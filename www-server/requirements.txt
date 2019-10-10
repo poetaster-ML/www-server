@@ -1,0 +1,8 @@
+graphene-django==2.0
+graphene-sqlalchemy==2.2.0
+django-cors-headers==3.1.1
+SQLAlchemy-Utils==0.34.2
+psycopg2==2.7.4
+gunicorn==19.9.0
+spacy==2.1.8
+boto3==1.9.226

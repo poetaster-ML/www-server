@@ -1,0 +1,38 @@
+version: '3.5'
+services:
+    www-server:
+        extra_hosts:
+            - 'local.poetaster.io:0.0.0.0'
+        env_file: ./.env.dev
+        build:
+            context: ./www-server
+            args:
+                - ENV=development
+        volumes:
+            - ./www-server/django-alchemy:/app/django-alchemy
+            - ./www-server/poetaster:/app/poetaster
+        depends_on:
+            - db
+        ports:
+            - '8001:8000'
+        networks:
+            default:
+                aliases:
+                    - local.poetaster.io
+        command: ['./wait-for.sh', 'db:5432', '--strict', '--', './run.sh']
+
+    db:
+        extra_hosts:
+            - 'local.poetaster.io:0.0.0.0'
+        image: postgres:12
+        ports:
+            - '8668:5432'
+        volumes:
+            - db_data:/var/lib/postgresql/data
+
+volumes:
+    db_data:
+
+networks:
+    default:
+        name: www_dev
