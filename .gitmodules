@@ -1,0 +1,3 @@
+[submodule "www-server/django-alchemy"]
+	path = www-server/django-alchemy
+	url = git@github.com:poetaster-org/django-alchemy.git
