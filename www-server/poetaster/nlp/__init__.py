@@ -11,7 +11,6 @@ DEFAULT_BACKEND = "poetaster.nlp.backends.SpacyBackend"
 
 def load_backend(backend_name):
     """Return an nlp backend."""
-
     try:
         module_bits = backend_name.split(".")
         klass = module_bits.pop()

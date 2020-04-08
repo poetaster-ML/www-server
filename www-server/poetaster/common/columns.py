@@ -1,7 +1,7 @@
 from sqlalchemy import (
     Column, String
 )
-from core.utils.slug import slugify
+from .utils.slug import slugify
 
 
 class SlugColumn(Column):

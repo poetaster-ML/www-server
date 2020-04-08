@@ -1,14 +1,11 @@
-import boto3
-import json
 from sqlalchemy.inspection import inspect
-from texts.models import (
+from .models import (
     Text, Author, PoetryFoundationData,
 )
 
-from core.management.commands import BaseCommand
 
 # Poetry foundation data keys
-# ---------------------------------------- #
+# -------------------------------------------------------------------- #
 AUTHOR = "author"
 CLASSIF = "classification"
 KEYWORDS = "keywords"
@@ -18,7 +15,7 @@ TEXT = "text"
 TITLE = "title"
 YEAR = "year"
 REGION = "region"
-# ---------------------------------------- #
+# -------------------------------------------------------------------- #
 
 
 class Import:
@@ -104,33 +101,3 @@ class TextImport(Import):
         YEAR: YEAR,
         TITLE: TITLE
     }
-
-    def process(self):
-        instance = super().process()
-        # instance.generate_nlp_constructs(session=self.session)
-        return instance
-
-
-class Command(BaseCommand):
-    def handle(self, *args, **options):
-        s3 = boto3.resource('s3')
-        bucket = s3.Bucket(name='poetry-collection')
-
-        for obj in list(bucket.objects.all()):
-            data = json.loads(obj.get()["Body"].read())
-
-            author = AuthorImport(self.session, data).process()
-
-            text = TextImport(
-                self.session, data, author_slug=author.slug
-            ).process()
-
-            poetry_foundation_data = PoetryFoundationDataImport(
-                self.session, data, text=text, author=author
-            ).process()
-
-            text.poetry_foundation_data_id = poetry_foundation_data.id
-
-            print(text.title, author.name)
-
-        self.session.commit()
