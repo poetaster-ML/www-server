@@ -1,32 +1,36 @@
 from sqlalchemy import (
     Column, ForeignKey, Integer, String, Text, Date,
-    ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint,
-    create_engine
+    ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint
 )
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.orm import backref, relationship, scoped_session, sessionmaker
+from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import backref, relationship
 from sqlalchemy.dialects.postgresql import JSON, ARRAY
 
 from sqlalchemy_utils import observes
 
 from nlp import get_backend as get_nlp_backend
 
-from core.models import (
+from common.models import (
     IDVersioned, SlugVersioned, relationship_ordered_by_version
 )
-from core.columns import SlugColumn
-from core.utils.slug import slugify
+from common.columns import SlugColumn
+from common.utils.slug import slugify
+
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 
 Base = declarative_base()
-
-APP_TABLE_PREFIX = "texts"
 
 engine = create_engine('postgresql://postgres@db:5432/postgres')
 
 # Create database session object
 session = scoped_session(sessionmaker(bind=engine, expire_on_commit=False))
 Base.query = session.query_property()
+
+
+APP_TABLE_PREFIX = "texts"
 
 
 class LocalFK(ForeignKey):
@@ -128,6 +132,11 @@ class TextPartsOfSpeech(Base, VersionedTextVersionRelatedNLPConstruct):
 class TextDependencyParse(Base, VersionedTextVersionRelatedNLPConstruct):
     __tablename__ = "texts_TextDependencyParse"
     nlp_field = "dependency_parse"
+
+
+class TextNLPDoc(Base, VersionedTextVersionRelatedNLPConstruct):
+    __tablename__ = "texts_TextNLPDoc"
+    nlp_field = "doc"
 
 
 class TextLabel(Base):
@@ -245,6 +254,9 @@ class Text(Base, SlugVersioned):
     dependency_parse_versions = relationship_ordered_by_version(
         TextDependencyParse, backref="text")
 
+    nlp_doc_versions = relationship_ordered_by_version(
+        TextNLPDoc, backref="text")
+
     intertextual_relations = relationship(
         "Text",
         secondary="texts_TextToTextRelation",
@@ -273,11 +285,28 @@ class Text(Base, SlugVersioned):
     def generate_slug(self, title):
         self.slug = slugify(Text, title, session)
 
+    @classmethod
+    def search(cls, query):
+        from .documents import TextDocument
+
+        search = TextDocument.search()
+        search = search.query(
+          "multi_match", query=query, fields=["title", "raw"]
+        )
+
+        search = search.highlight("title", fragment_size=0)
+        search = search.highlight("raw", fragment_size=0)
+
+        response = search.execute()
+
+        return response
+
     def generate_nlp_constructs(self, session=session):
         for model, relation in [
-            (TextTokens, "tokens_versions",),
-            (TextPartsOfSpeech, "parts_of_speech_versions",),
-            (TextDependencyParse, "dependency_parse_versions",),
+            # (TextTokens, "tokens_versions",),
+            # (TextPartsOfSpeech, "parts_of_speech_versions",),
+            # (TextDependencyParse, "dependency_parse_versions",),
+            (TextNLPDoc, "nlp_doc_versions")
         ]:
             collection = getattr(self, relation)
 
@@ -286,6 +315,6 @@ class Text(Base, SlugVersioned):
                 instance = collection[0]
             else:
                 instance = model(text=self)
-                session.add(instance)
 
             instance.value = instance.generate()
+            session.add(instance)

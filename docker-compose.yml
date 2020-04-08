@@ -1,38 +1,79 @@
 version: '3.5'
 services:
-    www-server:
-        extra_hosts:
-            - 'local.poetaster.io:0.0.0.0'
-        env_file: ./.env.dev
-        build:
-            context: ./www-server
-            args:
-                - ENV=development
-        volumes:
-            - ./www-server/django-alchemy:/app/django-alchemy
-            - ./www-server/poetaster:/app/poetaster
-        depends_on:
-            - db
-        ports:
-            - '8001:8000'
-        networks:
-            default:
-                aliases:
-                    - local.poetaster.io
-        command: ['./wait-for.sh', 'db:5432', '--strict', '--', './run.sh']
+  www-server:
+    extra_hosts:
+      - 'local.poetaster.io:0.0.0.0'
+    env_file: ./.env.dev
+    build:
+      context: ./www-server
+      args:
+        - ENV=development
+    volumes:
+      - ./www-server/django-alchemy:/app/django-alchemy
+      - ./www-server/poetaster:/app/poetaster
+    depends_on:
+      - db
+    ports:
+      - '8001:8000'
+    networks:
+      default:
+        aliases:
+          - local.poetaster.io
+    command: ['./wait-for.sh', 'db:5432', '--strict', '--', './run.sh', 'dev']
 
-    db:
-        extra_hosts:
-            - 'local.poetaster.io:0.0.0.0'
-        image: postgres:12
-        ports:
-            - '8668:5432'
-        volumes:
-            - db_data:/var/lib/postgresql/data
+  www-worker:
+    build:
+      context: ./www-server
+      args:
+        - ENV=development
+    env_file: ./.env.dev
+    volumes:
+      - ./www-server/django-alchemy:/app/django-alchemy
+      - ./www-server/poetaster:/app/poetaster
+    depends_on:
+      - db
+    command: ['./wait-for.sh', 'db:5432', '--strict', '--', './run.sh', 'worker']
+
+  message-broker:
+    build:
+      context: ./message-broker
+    volumes:
+      - message_broker_data:/var/lib/rabbitmq
+    ports:
+      - '15672:15672'
+    expose:
+      - '5672'
+
+  db:
+    extra_hosts:
+      - 'local.poetaster.io:0.0.0.0'
+    image: postgres:12
+    ports:
+      - '8668:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  search:
+    image: elasticsearch:7.6.0
+    ports:
+      - '9200:9200'
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
 
 volumes:
-    db_data:
+  db_data:
+  elasticsearch_data:
+  message_broker_data:
 
 networks:
-    default:
-        name: www_dev
+  default:
+    name: www_dev

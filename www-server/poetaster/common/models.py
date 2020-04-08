@@ -1,9 +1,8 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import (
-    Column, Integer, PrimaryKeyConstraint, String
+    Column, Integer, PrimaryKeyConstraint
 )
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy_utils import observes
 from .columns import SlugColumn
 
 

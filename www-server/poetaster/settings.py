@@ -19,14 +19,20 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "django_extensions",
     "graphene_django",
     "corsheaders"
 ]
 
 APPLICATION_APPS = [
-    "core",
+    "poetaster",
+    "api.v1",
+    "common",
+    "authors",
     "texts",
-    "nlp"
+    "semantics",
+    "syntax",
+    "nlp",
 ]
 
 INSTALLED_APPS = (
@@ -86,12 +92,12 @@ NLP = {
 }
 
 GRAPHENE = {
-    'SCHEMA': 'poetaster.schema.schema',
+    'SCHEMA': 'poetaster.api.v1.schema.schema',
 }
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = [
-    "http://local.poetaster.io:8080"
+    "http://local.poetaster.io:8666"
 ]
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -127,3 +133,11 @@ AWS_REGION_NAME = os.environ.get('AWS_REGION_NAME', 'us-east-1')
 boto3_session = Session(aws_access_key_id=AWS_ACCESS_KEY_ID,
                         aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
                         region_name=AWS_REGION_NAME)
+
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
+CELERY_BROKER_TRANSPORT = os.environ.get("CELERY_BROKER_TRANSPORT")
+CELERY_BROKER_HEARTBEAT = None
+CELERY_TASK_CREATE_MISSING_QUEUES = True
+CELERY_ROUTES = {
+    "texts.*": {"queue": "texts"}
+}
