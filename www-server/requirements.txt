@@ -3,7 +3,7 @@ gunicorn==19.9.0
 django-cors-headers==3.1.1
 django-extensions==2.2.8
 
-graphene-django==2.0
+graphene-django==2.10.1
 git+git://github.com/graphql-python/graphene-sqlalchemy.git#master
 
 SQLAlchemy-Utils==0.34.2

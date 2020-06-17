@@ -1,6 +1,6 @@
 import graphene
 from graphene import relay
-from texts.models import Text
+from texts import models
 
 from ..common.fields import (
     FilterableConnectionField,
@@ -8,12 +8,14 @@ from ..common.fields import (
 
 from .types import (
     TextConnection,
+    TextLabelConnection,
     SearchIndexedTextConnection,
     CollectionConnection
 )
 
 from .mutations import (
-    UpdateText,
+    TextUpdate,
+    TextCreate,
 )
 
 
@@ -30,9 +32,16 @@ class TextsQueries(graphene.ObjectType):
         CollectionConnection,
         slug=graphene.String())
 
+    text_labels = relay.ConnectionField(
+        TextLabelConnection)
+
+    def resolve_text_labels(root, info):
+        return models.session.query(models.TextLabel).all()
+
     def resolve_texts_search(root, info, query):
-        return Text.search(query)
+        return models.Text.search(query)
 
 
 class TextsMutations(graphene.ObjectType):
-    update_text = UpdateText.Field()
+    # text_update = TextUpdate.Field()
+    text_create = TextCreate.Field()

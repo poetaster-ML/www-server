@@ -2,9 +2,10 @@ from sqlalchemy import (
     Column, ForeignKey, Integer, String, Text, Date,
     ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint
 )
-from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy.ext.declarative import declared_attr, declarative_base
+from sqlalchemy.orm import backref, relationship, scoped_session, sessionmaker
 from sqlalchemy.dialects.postgresql import JSON, ARRAY
+from sqlalchemy import create_engine
 
 from sqlalchemy_utils import observes
 
@@ -15,10 +16,6 @@ from common.models import (
 )
 from common.columns import SlugColumn
 from common.utils.slug import slugify
-
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
 
 
 Base = declarative_base()
@@ -65,6 +62,19 @@ class Author(Base):
     @observes("name")
     def generate_slug(self, name):
         self.slug = slugify(Author, name, session)
+
+    @classmethod
+    def search(cls, query):
+        from .documents import AuthorDocument
+
+        search = AuthorDocument.search()
+        search = search.query(
+          "multi_match", query=query, fields=["name"]
+        )
+
+        response = search.execute()
+
+        return response
 
 
 class Collection(Base):

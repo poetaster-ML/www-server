@@ -1,6 +1,7 @@
 import graphene
 from .authors.schema import (
-    AuthorsQueries
+    AuthorsQueries,
+    AuthorsMutations
 )
 from .texts.schema import (
     TextsQueries,
@@ -16,7 +17,8 @@ class Query(
 
 
 class Mutation(
-    # TextsMutations,
+    AuthorsMutations,
+    TextsMutations,
     graphene.ObjectType
 ):
     pass
@@ -24,5 +26,5 @@ class Mutation(
 
 schema = graphene.Schema(
     query=Query,
-    # mutation=Mutation
+    mutation=Mutation
 )

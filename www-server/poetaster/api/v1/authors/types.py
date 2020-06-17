@@ -1,3 +1,4 @@
+import graphene
 from graphene import relay
 from ..common.types import (
     ModelNode,
@@ -15,3 +16,16 @@ class AuthorNode(ModelNode):
 class AuthorConnection(relay.Connection):
     class Meta:
         node = AuthorNode
+
+
+class SearchIndexedAuthorNode(graphene.ObjectType):
+    slug = graphene.String()
+    name = graphene.String()
+
+    class Meta:
+        interfaces = (relay.Node,)
+
+
+class SearchIndexedAuthorConnection(relay.Connection):
+    class Meta:
+        node = SearchIndexedAuthorNode

@@ -16,8 +16,12 @@ class SpacyClient:
     def get_parts_of_speech(self):
         return [token.pos_ for token in self.doc]
 
-    def get_dependency_parse(self):
-        return [(token.head.i, token.dep_) for token in self.doc]
+    def get_dependency_parse(self, sent):
+        tokens = [self.token_data(token) for token in sent]
+        root = [
+            token for token in tokens if token["head"] == token["id"]
+        ][0]
+        return root
 
     def to_tree(self, tree, children):
         for token in children:
@@ -38,19 +42,17 @@ class SpacyClient:
             "children": self.to_tree([], token.children)
         }
 
-    def get_doc_by_sentence(self):
-        for sent in self.doc.sents:
-            tokens = [self.token_data(token) for token in sent]
-            root = [
-                token for token in tokens if token["head"] == token["id"]
-            ][0]
+    def get_sentences(self):
+        for sentence in self.doc.sents:
             yield {
-                "tokens": tokens,
-                "tree": root
+                "tokens": [token.text for token in sentence],
+                "dependencyParse": self.get_dependency_parse(sentence)
             }
 
     def get_doc(self):
-        return list(self.get_doc_by_sentence())
+        return {
+            "sentences": list(self.get_sentences())
+        }
 
 
 class SpacyBackend(BaseBackend):

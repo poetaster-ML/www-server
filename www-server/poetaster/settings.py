@@ -30,9 +30,8 @@ APPLICATION_APPS = [
     "common",
     "authors",
     "texts",
-    "semantics",
-    "syntax",
     "nlp",
+    "plumbing",
 ]
 
 INSTALLED_APPS = (
@@ -141,3 +140,5 @@ CELERY_TASK_CREATE_MISSING_QUEUES = True
 CELERY_ROUTES = {
     "texts.*": {"queue": "texts"}
 }
+
+NLP_CCG_2_LAMBDA_URL = os.environ.get("CCG_2_LAMBDA_URL")
