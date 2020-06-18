@@ -1,6 +1,6 @@
 import graphene
 from texts import models
-from .types import TextNode, TextLabelRelationNode
+from .types import TextNode, TextAnnotationRelationNode
 
 
 class TextUpdate(graphene.Mutation):
@@ -32,7 +32,7 @@ class TextCreate(graphene.Mutation):
         return TextCreate(text=text)
 
 
-class TextLabelRelationCreate(graphene.Mutation):
+class TextAnnotationRelationCreate(graphene.Mutation):
     class Arguments:
         text_slug = graphene.String()
         text_version = graphene.Int()
@@ -42,7 +42,7 @@ class TextLabelRelationCreate(graphene.Mutation):
         commentary = graphene.String()
         text_index = graphene.Int()
 
-    text_label_relation = graphene.Field(TextLabelRelationNode)
+    text_annotation_relation = graphene.Field(TextAnnotationRelationNode)
 
     def mutate(
         cls,
@@ -53,7 +53,7 @@ class TextLabelRelationCreate(graphene.Mutation):
         commentary,
         text_index
     ):
-        text_label_relation = models.TextLabelRelation(
+        text_annotation_relation = models.TextAnnotationRelation(
           text_slug=text_slug,
           text_version=text_version,
           label_id=label_id,
@@ -61,6 +61,7 @@ class TextLabelRelationCreate(graphene.Mutation):
           text_index=text_index
         )
 
-        models.session.add(text_label_relation)
+        models.session.add(text_annotation_relation)
         models.session.commit()
-        return TextLabelRelationCreate(text_label_relation=text_label_relation)
+        return TextAnnotationRelationCreate(
+          text_annotation_relation=text_annotation_relation)

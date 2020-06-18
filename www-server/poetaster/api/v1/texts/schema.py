@@ -8,7 +8,7 @@ from ..common.fields import (
 
 from .types import (
     TextConnection,
-    TextLabelConnection,
+    TextAnnotationConnection,
     SearchIndexedTextConnection,
     CollectionConnection
 )
@@ -32,10 +32,10 @@ class TextsQueries(graphene.ObjectType):
         CollectionConnection,
         slug=graphene.String())
 
-    text_labels = relay.ConnectionField(
-        TextLabelConnection)
+    text_annotations = relay.ConnectionField(
+        TextAnnotationConnection)
 
-    def resolve_text_labels(root, info):
+    def resolve_text_annotations(root, info):
         return models.session.query(models.TextLabel).all()
 
     def resolve_texts_search(root, info, query):

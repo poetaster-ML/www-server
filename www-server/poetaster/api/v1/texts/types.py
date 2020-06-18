@@ -17,21 +17,21 @@ class TextNLPDocNode(ModelNode):
         model = models.TextNLPDoc
 
 
-class TextLabelNode(ModelNode):
+class TextAnnotationNode(ModelNode):
     class Meta(ModelNodeMeta):
         model = models.TextLabel
 
 
-class TextLabelConnection(relay.Connection):
+class TextAnnotationConnection(relay.Connection):
     class Meta:
-        node = TextLabelNode
+        node = TextAnnotationNode
 
     class Edge:
         commentary = graphene.String()
         text_index = graphene.Int()
 
 
-class TextLabelRelationNode(ModelNode):
+class TextAnnotationRelationNode(ModelNode):
     class Meta(ModelNodeMeta):
         model = models.TextLabelRelation
 
@@ -43,7 +43,7 @@ class IntertextualRelationNode(ModelNode):
 
 class TextNode(VersionedModelNode):
     nlp_doc_versions = ConnectionField(TextNLPDocNode.connection)
-    labels = ConnectionField(TextLabelConnection)
+    labels = ConnectionField(TextAnnotationConnection)
     intertextual_relations = ConnectionField(IntertextualRelationNode.connection)
 
     class Meta(ModelNodeMeta):
