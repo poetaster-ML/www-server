@@ -16,6 +16,7 @@ from .types import (
 from .mutations import (
     TextUpdate,
     TextCreate,
+    TextAnnotationRelationCreate
 )
 
 
@@ -45,3 +46,5 @@ class TextsQueries(graphene.ObjectType):
 class TextsMutations(graphene.ObjectType):
     # text_update = TextUpdate.Field()
     text_create = TextCreate.Field()
+
+    text_annotation_relation_create = TextAnnotationRelationCreate.Field()

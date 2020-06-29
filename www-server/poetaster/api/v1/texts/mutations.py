@@ -35,7 +35,7 @@ class TextCreate(graphene.Mutation):
 class TextAnnotationRelationCreate(graphene.Mutation):
     class Arguments:
         text_slug = graphene.String()
-        text_version = graphene.Int()
+        text_version = graphene.String()
 
         label_id = graphene.Int()
 
@@ -53,7 +53,7 @@ class TextAnnotationRelationCreate(graphene.Mutation):
         commentary,
         text_index
     ):
-        text_annotation_relation = models.TextAnnotationRelation(
+        text_annotation_relation = models.TextLabelRelation(
           text_slug=text_slug,
           text_version=text_version,
           label_id=label_id,
