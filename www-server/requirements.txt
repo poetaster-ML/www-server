@@ -14,7 +14,7 @@ spacy==2.1.8
 boto3==1.9.226
 
 celery==4.3.0
-flower==0.9.3
+flower==1.2.0
 tornado==4.2
 gevent==1.4.0
 
